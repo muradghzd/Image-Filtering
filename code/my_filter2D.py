@@ -1,7 +1,7 @@
 import cv2
+import numpy as np
 
-
-def my_filter2D(image, kernel):
+def my_filter2D(image, kernel, pad_reflected=False):
     # This function computes convolution given an image and kernel.
     # While "correlation" and "convolution" are both called filtering, here is a difference;
     # 2-D correlation is related to 2-D convolution by a 180 degree rotation of the filter matrix.
@@ -30,6 +30,41 @@ def my_filter2D(image, kernel):
     # - FFT-based convolution
 
     ################
-    # Your code here
-    ################
-    pass
+    a, b = kernel.shape
+
+    if a%2==0 or b%2==0:
+        raise Exception(f"Filter is of even-dimension")
+ 
+    # Horizontal and Vertical pad
+    h_pad, v_pad = (a-1)//2, (b-1)//2
+    x, y = image.shape[:2]
+
+    mode = 'reflect' if pad_reflected else 'constant'
+
+    if len(image.shape) == 3: # RGB images
+        new_image = np.pad(image, ((h_pad,h_pad), (v_pad,v_pad), (0,0)), mode)
+        flipped_kernel = np.rot90(kernel, 2)
+        # Broadcasted kernel for multiplication
+        broadcasted_kernel = np.expand_dims(flipped_kernel, axis=-1)
+        result_image = np.zeros_like(image)
+        
+        for i in range(x):
+            for j in range(y):
+                # Take the respective part of image for convolution
+                subset_image = new_image[i:i+a,j:j+b]
+                result_image[i,j] = np.sum(subset_image*broadcasted_kernel, axis=(0,1)) 
+    else: # Grayscale images
+        new_image = np.pad(image, ((h_pad,h_pad), (v_pad,v_pad)), mode)
+        flipped_kernel = np.rot90(kernel, 2)
+        result_image = np.zeros_like(image)
+        
+        for i in range(x):
+            for j in range(y):
+                subset_image = new_image[i:i+a,j:j+b]
+                result_image[i,j] = np.sum(subset_image*flipped_kernel)
+
+    return result_image
+
+if __name__=='__main__':
+    image = cv2.imread("/home/murad/Desktop/KAIST/Fall22/CS484/HW2/data/cat.bmp")
+    print(f"Image size: {image.shape}")
