@@ -21,18 +21,18 @@ def gen_hybrid_image(image1, image2, cutoff_frequency):
     kernel = cv2.getGaussianKernel(cutoff_frequency * 4 + 1, cutoff_frequency)
     # 2-D Guassian kernel
     kernel = np.matmul(kernel, kernel.T)
-    low_frequencies = None      # Your code here
+    low_frequencies = my_filter2D(image1, kernel)      # Your code here
 
     ########################################################################
     # Remove the low frequencies from image2.
     # The easiest way to do this is to subtract a blurred version of image2 from the original version of image2.
     # This will give you an image centered at zero with negative values.
     ########################################################################
-    high_frequencies = None     # Your code here
+    high_frequencies = image2 - my_filter2D(image2, kernel)     # Your code here
 
     ########################################################################
     # Combine the high frequencies and low frequencies
     ########################################################################
-    hybrid_image = None         # Your code here
+    hybrid_image = low_frequencies + high_frequencies         # Your code here
 
     return hybrid_image, low_frequencies, high_frequencies
