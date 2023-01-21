@@ -1,1 +1,2 @@
-# CS484 Intro to Computer Vision HW2
+# Image Filtering
+Implementation of image convolution function to create hybrid images
